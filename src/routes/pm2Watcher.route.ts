@@ -37,6 +37,10 @@ export class Pm2WatcherRoutes implements Routes {
       `${this.path}/reload`,
       this.pm2WatcherController.reloadProcess
     );
+    this.router.post(
+      `${this.path}/slackmessagetest`,
+      this.pm2WatcherController.slackMessageTest
+    );
     this.router.delete(
       `${this.path}/delete`,
       this.pm2WatcherController.deleteProcess

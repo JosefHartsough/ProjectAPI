@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from "express";
+import axios from "axios";
 import { Pm2WatcherService } from "../services/pm2Watcher.service";
+import { SLACK_WEBHOOK } from "../config";
 
 export class Pm2WatcherController {
   public pm2WatcherService = new Pm2WatcherService();
@@ -162,5 +164,70 @@ export class Pm2WatcherController {
       res.status(500);
       console.error("Error occurred while getting logs");
     }
+  };
+
+  public slackMessageTest = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      console.log("did we make it here?");
+      const res = await axios.post(SLACK_WEBHOOK, {
+        channel: "#pm2-slack-notify",
+        attachments: [
+          {
+            color: "#00FF00",
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `*Test Slack Message*`,
+                },
+              },
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `Test detail section`,
+                },
+              },
+              {
+                type: "context",
+                elements: [
+                  {
+                    type: "image",
+                    image_url: `https://upload.wikimedia.org/wikipedia/commons/d/de/Flag_of_the_United_States.png`,
+                    alt_text: "images",
+                  },
+                  {
+                    type: "mrkdwn",
+                    text: `*Test Image`,
+                  },
+                ],
+              },
+              {
+                type: "context",
+                elements: [
+                  {
+                    type: "image",
+                    image_url:
+                      "https://upload.wikimedia.org/wikipedia/commons/d/de/Flag_of_the_United_States.png",
+                    alt_text: "images",
+                  },
+                  {
+                    type: "mrkdwn",
+                    text: `*Test Footer`,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      console.log(res.data);
+    } catch (error) {}
   };
 }

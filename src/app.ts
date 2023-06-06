@@ -4,7 +4,7 @@ import express from "express";
 import helmet from "helmet";
 import hpp from "hpp";
 import { Routes } from "./interfaces/routes.interface";
-import { NODE_ENV, PORT, ORIGIN, CREDENTIALS } from "./config";
+import { NODE_ENV, PORT, ORIGIN, CREDENTIALS, SLACK_WEBHOOK } from "./config";
 import errorMiddleware from "./middlewares/error.middleware";
 
 class App {
