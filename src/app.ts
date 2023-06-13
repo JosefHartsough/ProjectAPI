@@ -5,18 +5,21 @@ import helmet from "helmet";
 import hpp from "hpp";
 import { Routes } from "./interfaces/routes.interface";
 import { NODE_ENV, PORT, ORIGIN, CREDENTIALS, SLACK_WEBHOOK } from "./config";
+import { Pm2WatcherController } from "./controllers/pm2Watcher.controller";
 import errorMiddleware from "./middlewares/error.middleware";
 
 class App {
   public app: express.Application;
   public env: string;
   public port: string | number;
+  public pm2WatcherController = new Pm2WatcherController();
 
   constructor(routes: Routes[]) {
     this.app = express();
     this.env = NODE_ENV || "development";
     this.port = PORT || 3000;
 
+    this.initializeSlackWebhooks();
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeErrorHandling();
@@ -33,6 +36,10 @@ class App {
 
   public getServer() {
     return this.app;
+  }
+
+  public initializeSlackWebhooks() {
+    this.pm2WatcherController.slackMessageHandler();
   }
 
   public initializeMiddlewares() {

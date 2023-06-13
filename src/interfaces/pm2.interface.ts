@@ -13,6 +13,7 @@ export interface Message {
 export interface EventData {
   at: number;
   process: {
+    pm_id;
     username: string;
     watch: boolean;
     namespace: string;

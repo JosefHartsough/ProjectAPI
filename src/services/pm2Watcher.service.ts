@@ -56,4 +56,9 @@ export class Pm2WatcherService {
     const logs = await pm2Watcher.getLogs(outputPath);
     return logs;
   }
+
+  public async slackMessageHandler() {
+    const data = await pm2Watcher.launchBus();
+    return data;
+  }
 }

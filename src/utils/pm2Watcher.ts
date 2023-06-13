@@ -215,42 +215,46 @@ export class PM2Watcher {
   }
 
   // Creates a new bus object that listens for an event
-  public launchBus(): void {
-    console.log("PM2Watcher Started");
-    pm2.launchBus((err: any, bus: any) => {
-      bus.on("process:exception", (msg: Message) => {
-        console.log("process:exception", msg);
-      });
+  public async launchBus(): Promise<any> {
+    const status = await new Promise((resolve, reject) => {
+      pm2.launchBus((err: any, bus: any) => {
+        // bus.on("process:exception", (msg: Message) => {
+        //   console.log("process:exception", msg);
+        // });
 
-      bus.on("log:err", (msg: Message) => {
-        console.log("log:err", msg);
-      });
+        bus.on("log:err", async (msg: Message) => {
+          const { pm_id: pmId }: { pm_id: number } = msg.process;
+          const processStopped = await this.stopProcess(pmId);
+          resolve(msg);
+        });
 
-      bus.on("pm2:kill", (msg: Message) => {
-        console.log("pm2:kill", msg);
-      });
+        bus.on("pm2:kill", (msg: Message) => {
+          console.log("pm2:kill", msg);
+        });
 
-      bus.on("log:out", (msg: Message) => {
-        console.log("log:out", msg);
-      });
+        bus.on("log:out", (msg: Message) => {
+          console.log("log:out", msg);
+        });
 
-      bus.on("process:event", (data: EventData) => {
-        if (data.process.name === "pm2_watcher.ts") return;
-        switch (data.event) {
-          case "start":
-            console.log(`${data.process.name} has started`);
-            break;
-          case "stop":
-            console.log(`${data.process.name} has stopped`);
-            break;
-          case "restart":
-            console.log(`${data.process.name} has restarted`);
-            break;
-          case "restart overlimit":
-            console.log(`${data.process.name} has reached its restart limit`);
-            break;
-        }
+        bus.on("process:event", (data: EventData) => {
+          if (data.process.name === "pm2_watcher.ts") return;
+          switch (data.event) {
+            case "start":
+              console.log(`${data.process.name} has started`);
+              break;
+            case "stop":
+              console.log(`${data.process.name} has stopped`);
+              break;
+            case "restart":
+              console.log(`${data.process.name} has restarted`);
+              break;
+            case "restart overlimit":
+              console.log(`${data.process.name} has reached its restart limit`);
+              break;
+          }
+        });
       });
     });
+    return status;
   }
 }

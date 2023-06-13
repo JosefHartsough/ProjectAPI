@@ -166,63 +166,73 @@ export class Pm2WatcherController {
     }
   };
 
-  public slackMessageTest = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  public slackMessageHandler = async () => {
     try {
-      console.log("did we make it here?");
+      const processData = await this.pm2WatcherService.slackMessageHandler();
+      const {
+        data,
+        at,
+        process: { name, pm_id: pmId },
+      }: {
+        data: string;
+        at: number;
+        process: { name: string; pm_id: number };
+      } = processData;
+      this.slackMessageTest({ data, at, name, pmId });
+    } catch (error) {
+      console.error("Error on slackMessageHandler");
+    }
+  };
+
+  public slackMessageTest = async ({ data, at, name, pmId }): Promise<void> => {
+    try {
       const res = await axios.post(SLACK_WEBHOOK, {
-        channel: "#pm2-slack-notify",
-        attachments: [
+        blocks: [
           {
-            color: "#00FF00",
-            blocks: [
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "New Event",
+              emoji: true,
+            },
+          },
+          {
+            type: "section",
+            fields: [
               {
-                type: "section",
-                text: {
-                  type: "mrkdwn",
-                  text: `*Test Slack Message*`,
-                },
+                type: "mrkdwn",
+                text: "*Type:*\nError",
               },
               {
-                type: "section",
-                text: {
-                  type: "mrkdwn",
-                  text: `Test detail section`,
-                },
-              },
-              {
-                type: "context",
-                elements: [
-                  {
-                    type: "image",
-                    image_url: `https://upload.wikimedia.org/wikipedia/commons/d/de/Flag_of_the_United_States.png`,
-                    alt_text: "images",
-                  },
-                  {
-                    type: "mrkdwn",
-                    text: `*Test Image`,
-                  },
-                ],
-              },
-              {
-                type: "context",
-                elements: [
-                  {
-                    type: "image",
-                    image_url:
-                      "https://upload.wikimedia.org/wikipedia/commons/d/de/Flag_of_the_United_States.png",
-                    alt_text: "images",
-                  },
-                  {
-                    type: "mrkdwn",
-                    text: `*Test Footer`,
-                  },
-                ],
+                type: "mrkdwn",
+                text: `*PM ID:*\n${pmId}`,
               },
             ],
+          },
+          {
+            type: "section",
+            fields: [
+              {
+                type: "mrkdwn",
+                text: `*When:*\n${at}`,
+              },
+            ],
+          },
+          {
+            type: "section",
+            fields: [
+              {
+                type: "mrkdwn",
+                text: `*Data:*\n${data}`,
+              },
+            ],
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `<http://localhost:5173/${pmId}>`,
+            },
           },
         ],
       });
