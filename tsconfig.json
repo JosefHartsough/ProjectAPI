@@ -23,7 +23,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@config": ["config"],
-      "@controllers/*": ["controllers/*"],
+      "@controllers/*": ["./controllers/*"],
       "@dtos/*": ["dtos/*"],
       "@exceptions/*": ["exceptions/*"],
       "@interfaces/*": ["./interfaces/*"],

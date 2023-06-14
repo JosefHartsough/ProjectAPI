@@ -1,9 +1,9 @@
-import { PM2Watcher } from "../utils/pm2Watcher";
+import PM2Watcher from "../utils/pm2Watcher";
 import { ProcessInfo } from "@interfaces/pm2.interface";
 
 const pm2Watcher = new PM2Watcher();
 
-export class Pm2WatcherService {
+export default class Pm2WatcherService {
   public async listProcesses(): Promise<any[]> {
     const processList: any[] = await pm2Watcher.listProcesses();
     return processList;
@@ -54,6 +54,11 @@ export class Pm2WatcherService {
 
   public async getLogs(outputPath: string): Promise<any> {
     const logs = await pm2Watcher.getLogs(outputPath);
+    return logs;
+  }
+
+  public async getErrorLog(): Promise<any> {
+    const logs = await pm2Watcher.getErrorLog();
     return logs;
   }
 

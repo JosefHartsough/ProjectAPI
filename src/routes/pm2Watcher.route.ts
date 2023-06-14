@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { Routes } from "@interfaces/routes.interface";
-import { Pm2WatcherController } from "../controllers/pm2Watcher.controller";
+import { Notifications } from "../controllers/notifications.controller";
+import Pm2WatcherController from "../controllers/pm2Watcher.controller";
 
 export class Pm2WatcherRoutes implements Routes {
   public path = "/api/pm2";
   public router = Router();
+  public notificationController = new Notifications();
   public pm2WatcherController = new Pm2WatcherController();
 
   constructor() {
@@ -25,6 +27,10 @@ export class Pm2WatcherRoutes implements Routes {
       this.pm2WatcherController.describe
     );
     this.router.get(`${this.path}/logs`, this.pm2WatcherController.getLogs);
+    this.router.get(
+      `${this.path}/errorlogs`,
+      this.pm2WatcherController.getErrorLog
+    );
     this.router.post(
       `${this.path}/stop`,
       this.pm2WatcherController.stopProcess
@@ -37,10 +43,10 @@ export class Pm2WatcherRoutes implements Routes {
       `${this.path}/reload`,
       this.pm2WatcherController.reloadProcess
     );
-    this.router.post(
-      `${this.path}/slackmessagetest`,
-      this.pm2WatcherController.slackMessageTest
-    );
+    // this.router.post(
+    //   `${this.path}/slackmessagetest`,
+    //   this.notificationController.slackMessageTest
+    // );
     this.router.delete(
       `${this.path}/delete`,
       this.pm2WatcherController.deleteProcess

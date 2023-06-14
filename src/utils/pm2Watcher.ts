@@ -7,6 +7,7 @@ import {
 } from "@interfaces/pm2.interface";
 
 import fs from "fs";
+import { Notifications } from "../controllers/notifications.controller";
 
 // TODO: Create a proper type for all any types
 
@@ -21,7 +22,9 @@ type ProcessData = {
   memory: number;
 };
 
-export class PM2Watcher {
+const notificationController = new Notifications();
+
+class PM2Watcher {
   /**
    * Connect to an existing pm2 or start a new pm2 instance
    * @param err
@@ -202,6 +205,7 @@ export class PM2Watcher {
     return processData;
   }
 
+  // TODO: Make into async function
   public async getLogs(outputPath: string) {
     const outputLog = fs.readFileSync(
       "/Users/josefhartsough/.pm2/logs/test-file-js-2-out.log",
@@ -212,6 +216,17 @@ export class PM2Watcher {
     //  return fs.readFileSync(outputPath, "utf8")
 
     // }
+  }
+
+  // TODO: Make into async function
+  // TODO: String needs to be parsed because its freaking YUUUGGEEEE
+  public async getErrorLog(): Promise<any> {
+    const log = fs.readFileSync(
+      "/Users/josefhartsough/.pm2/logs/test-file-js-2-error.log",
+      "utf8"
+    );
+    console.log(log);
+    return log;
   }
 
   // Creates a new bus object that listens for an event
@@ -225,6 +240,18 @@ export class PM2Watcher {
         bus.on("log:err", async (msg: Message) => {
           const { pm_id: pmId }: { pm_id: number } = msg.process;
           const processStopped = await this.stopProcess(pmId);
+
+          const {
+            data,
+            at,
+            process: { name },
+          } = msg;
+          await notificationController.slackMessageTest({
+            data,
+            at,
+            pmId,
+            name,
+          });
           resolve(msg);
         });
 
@@ -258,3 +285,5 @@ export class PM2Watcher {
     return status;
   }
 }
+
+export default PM2Watcher;

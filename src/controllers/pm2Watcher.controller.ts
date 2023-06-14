@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import axios from "axios";
-import { Pm2WatcherService } from "../services/pm2Watcher.service";
-import { SLACK_WEBHOOK } from "../config";
+import Pm2WatcherService from "../services/pm2Watcher.service";
 
-export class Pm2WatcherController {
+export default class Pm2WatcherController {
   public pm2WatcherService = new Pm2WatcherService();
 
   public listProcesses = async (
@@ -166,78 +164,21 @@ export class Pm2WatcherController {
     }
   };
 
-  public slackMessageHandler = async () => {
+  public getErrorLog = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const processData = await this.pm2WatcherService.slackMessageHandler();
-      const {
-        data,
-        at,
-        process: { name, pm_id: pmId },
-      }: {
-        data: string;
-        at: number;
-        process: { name: string; pm_id: number };
-      } = processData;
-      this.slackMessageTest({ data, at, name, pmId });
+      let outputPath: string;
+      if (req.query && req.query.outputPath) {
+        process = (req.query as any).outputPath;
+      }
+      const logs = await this.pm2WatcherService.getErrorLog();
+      res.status(200).json({ logs });
     } catch (error) {
-      console.error("Error on slackMessageHandler");
+      res.status(500);
+      console.error("Error occurred while getting logs");
     }
-  };
-
-  public slackMessageTest = async ({ data, at, name, pmId }): Promise<void> => {
-    try {
-      const res = await axios.post(SLACK_WEBHOOK, {
-        blocks: [
-          {
-            type: "header",
-            text: {
-              type: "plain_text",
-              text: "New Event",
-              emoji: true,
-            },
-          },
-          {
-            type: "section",
-            fields: [
-              {
-                type: "mrkdwn",
-                text: "*Type:*\nError",
-              },
-              {
-                type: "mrkdwn",
-                text: `*PM ID:*\n${pmId}`,
-              },
-            ],
-          },
-          {
-            type: "section",
-            fields: [
-              {
-                type: "mrkdwn",
-                text: `*When:*\n${at}`,
-              },
-            ],
-          },
-          {
-            type: "section",
-            fields: [
-              {
-                type: "mrkdwn",
-                text: `*Data:*\n${data}`,
-              },
-            ],
-          },
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: `<http://localhost:5173/${pmId}>`,
-            },
-          },
-        ],
-      });
-
-      console.log(res.data);
-    } catch (error) {}
   };
 }
