@@ -10,4 +10,5 @@ export const {
   LOG_DIR,
   ORIGIN,
   SLACK_WEBHOOK,
+  WEBSOCKET_PORT,
 } = process.env;

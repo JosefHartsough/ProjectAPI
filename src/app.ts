@@ -7,12 +7,14 @@ import { Routes } from "./interfaces/routes.interface";
 import { NODE_ENV, PORT, ORIGIN, CREDENTIALS } from "./config";
 import errorMiddleware from "./middlewares/error.middleware";
 import PM2Watcher from "./utils/pm2Watcher";
+import SocketHandler from "./utils/socketHandler";
 
 class App {
   public app: express.Application;
   public env: string;
   public port: string | number;
   public pm2Watcher = new PM2Watcher();
+  public socketHanlder = new SocketHandler();
 
   constructor(routes: Routes[]) {
     this.app = express();
@@ -23,6 +25,7 @@ class App {
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeErrorHandling();
+    this.initilizeSocketHandler();
   }
 
   public listen() {
@@ -59,6 +62,10 @@ class App {
 
   private initializeErrorHandling() {
     this.app.use(errorMiddleware);
+  }
+
+  private initilizeSocketHandler() {
+    this.socketHanlder.test();
   }
 }
 
